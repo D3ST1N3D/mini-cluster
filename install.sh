@@ -10,4 +10,4 @@ kubectl apply -f ingress.yml
 # applies the scale configuration to the deployment
 kubectl apply -f scale-sample-app.yaml
 # used to test the deployment autoscaling by increasing or decreasing load-test pod count
-kubectl apply -f load-test-deployment.yaml
+# kubectl apply -f load-test-deployment.yaml

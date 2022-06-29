@@ -1,52 +1,23 @@
 # Mini Cluster
 
-## Table of Contents
-- [Summary](#summary)
-- [Details](#details)
-- [Solution](#solution)
-
-## Summary
-Imagine that you have a kubernetes cluster. This cluster orchestrates many services behind the load balancer.
-
 ## Details
-- Clone the GitHub repo on your local which is specified as [sample-app](sample-app/).
-- Create a docker file for building a .net core web app within the docker image.
-- You need to create a DockerHub account for uploading image.
-- Build a docker image and upload this to the DockerHub.
-- End to End HTTP communication is Ok for this case study.
-- Create a kubernetes definition file for :
-     - Create one ingress for handling HTTP requests from outside the cluster 
-     - Create one service for load balancing across the pods 
-     - Create a deployment with two pods that are hosting our app instances from DockerHub (which is you've uploaded).
-- You should be able to test the application with the following URL pattern with HTTP GET request when you complete it :
-     - > http://{{IP}}:{{Port}}/WeatherForecast
+- The Docker file in the project creates a docker instance that builds the sample-app and sets the app to execute as its entry point.
 
-- You could prepare one-click install script file as bash or shell to install and run the mini-cluster.
+- The sample-app-deployment yaml is configured to create pods for the application and expose them on port 8080 in the cluster. It is also set to start with 2 replicas. It also sets a cpu limitation on the pods which is not required but was done to help with testing.
 
-## Solution
-### build image
-docker build --pull -t raafeh/sample-app . --progress=plain --no-cache
-### for testing image created
-    docker run --rm -it -p 8000:80 sample-app --name sample-app-running
-### push to hub
-docker push raafeh/sample-app:latest
+- The ingress yaml creates an ingress for the application traffic and gives it the name simple.app to be used as a domain on the host machine.
 
+- The scale-sample-app yaml adds scalability to the pods by setting a rule that defines a min of 2 replicas and a maximum of 10 replicas for the app. It also sets the control for scaling to be if the existing pods are averaging 75% cpu usage.
 
-### install minikube and run pod on it
-# expect minikube to be installed on the system otherwise these commands
-curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-darwin-amd64\nsudo install minikube-darwin-amd64 /usr/local/bin/minikube
-sudo install minikube-darwin-amd64 /usr/local/bin/minikube\n
-minikube start
+- The load-test-deployment yaml creates 2 stress testing pods that curl the sample app instances contantly in order to see if the extra load triggeres the scaling setup.
 
-### ingress
-# Gets the imaghe from docker hub and deploys the image
-kubectl apply -f sample-app-deployment.yaml
-# Activates ingress in minikube to allow access of the pod over port 80 and by name (sample.app)
-minikube addon enable ingress
-kubectl apply -f ingress.yml
-# on mac we needed to use this to open the ingress 
-minikube tunnel &
-# applies the scale configuration to the deployment
-kubectl apply -f scale-sample-app.yaml
-# used to test the deployment autoscaling by increasing or decreasing load-test pod count
-kubectl apply -f load-test-deployment.yaml
+- The install script can be used to deploy the sample application using the docker image i have uploaded.
+
+- The following command will deploy the stress test pods.
+    - ```kubectl apply -f load-test-deployment.yaml```
+
+- The following command can be used to increase the number of replicas for the stress testers.
+    - ``` kubectl scale deployment/infinite-calls --replicas 8 ```
+
+- With the moniter-server paket installed we can now see the cpu usage and replicas of the app using the following command
+    - ``` kubectl get hpa ```
