@@ -13,6 +13,11 @@
 
 - The install script can be used to deploy the sample application using the docker image i have uploaded.
 
+- After deployment the app should be available on the host machine using curl on the ip address or the url sample.app/
+    - ``` curl http://sample.app/WeatherForecast```
+
+## Test
+
 - The following command will deploy the stress test pods.
     - ```kubectl apply -f load-test-deployment.yaml```
 
