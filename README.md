@@ -1,5 +1,3 @@
-![RoofStacks Logo](../../roofstacks-logo.png)
-
 # Mini Cluster
 
 ## Table of Contents
@@ -26,4 +24,29 @@ Imagine that you have a kubernetes cluster. This cluster orchestrates many servi
 - You could prepare one-click install script file as bash or shell to install and run the mini-cluster.
 
 ## Solution
-Design a system that contains all rules in the details and please make a readme file to explain your solution. You could also draw diagrams and flow charts. You could use any software language, platform, tool, library, or framework except those specified as required in the details section. Please push your solution to GitHub and share the related URL with us.
+### build image
+docker build --pull -t raafeh/sample-app . --progress=plain --no-cache
+### for testing image created
+    docker run --rm -it -p 8000:80 sample-app --name sample-app-running
+### push to hub
+docker push raafeh/sample-app:latest
+
+
+### install minikube and run pod on it
+# expect minikube to be installed on the system otherwise these commands
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-darwin-amd64\nsudo install minikube-darwin-amd64 /usr/local/bin/minikube
+sudo install minikube-darwin-amd64 /usr/local/bin/minikube\n
+minikube start
+
+### ingress
+# Gets the imaghe from docker hub and deploys the image
+kubectl apply -f sample-app-deployment.yaml
+# Activates ingress in minikube to allow access of the pod over port 80 and by name (sample.app)
+minikube addon enable ingress
+kubectl apply -f ingress.yml
+# on mac we needed to use this to open the ingress 
+minikube tunnel &
+# applies the scale configuration to the deployment
+kubectl apply -f scale-sample-app.yaml
+# used to test the deployment autoscaling by increasing or decreasing load-test pod count
+kubectl apply -f load-test-deployment.yaml
