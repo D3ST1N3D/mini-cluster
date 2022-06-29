@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "2"
+  generation: 3
+  labels:
+    app: infinite-calls
+  name: infinite-calls
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: infinite-calls
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: infinite-calls
+    spec:
+      containers:
+      - name: infinite-calls
+        image: busybox
+        command:
+        - /bin/sh
+        - -c
+        - "while true; do wget -q -O- http://web/WeatherForecast; done"
